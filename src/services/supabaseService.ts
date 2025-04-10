@@ -90,7 +90,7 @@ export const getProperties = async (): Promise<Property[]> => {
     throw error;
   }
   
-  return data || [];
+  return data as Property[] || [];
 };
 
 export const getPropertyById = async (id: string): Promise<Property | null> => {
@@ -105,7 +105,7 @@ export const getPropertyById = async (id: string): Promise<Property | null> => {
     return null;
   }
   
-  return data;
+  return data as Property;
 };
 
 export const createProperty = async (property: NewProperty): Promise<Property> => {
@@ -120,7 +120,7 @@ export const createProperty = async (property: NewProperty): Promise<Property> =
     throw error;
   }
   
-  return data;
+  return data as Property;
 };
 
 export const updateProperty = async (id: string, updates: Partial<Property>): Promise<Property> => {
@@ -136,7 +136,7 @@ export const updateProperty = async (id: string, updates: Partial<Property>): Pr
     throw error;
   }
   
-  return data;
+  return data as Property;
 };
 
 export const deleteProperty = async (id: string): Promise<void> => {
@@ -166,7 +166,7 @@ export const getPropertyUnits = async (propertyId?: string): Promise<PropertyUni
     throw error;
   }
   
-  return data || [];
+  return data as PropertyUnit[] || [];
 };
 
 export const getPropertyUnitById = async (id: string): Promise<PropertyUnit | null> => {
@@ -181,7 +181,7 @@ export const getPropertyUnitById = async (id: string): Promise<PropertyUnit | nu
     return null;
   }
   
-  return data;
+  return data as PropertyUnit;
 };
 
 export const createPropertyUnit = async (unit: NewPropertyUnit): Promise<PropertyUnit> => {
@@ -196,7 +196,7 @@ export const createPropertyUnit = async (unit: NewPropertyUnit): Promise<Propert
     throw error;
   }
   
-  return data;
+  return data as PropertyUnit;
 };
 
 export const updatePropertyUnit = async (id: string, updates: Partial<PropertyUnit>): Promise<PropertyUnit> => {
@@ -212,7 +212,7 @@ export const updatePropertyUnit = async (id: string, updates: Partial<PropertyUn
     throw error;
   }
   
-  return data;
+  return data as PropertyUnit;
 };
 
 export const deletePropertyUnit = async (id: string): Promise<void> => {
@@ -242,7 +242,7 @@ export const getTenants = async (unitId?: string): Promise<Tenant[]> => {
     throw error;
   }
   
-  return data || [];
+  return data as Tenant[] || [];
 };
 
 export const getTenantById = async (id: string): Promise<Tenant | null> => {
@@ -257,7 +257,7 @@ export const getTenantById = async (id: string): Promise<Tenant | null> => {
     return null;
   }
   
-  return data;
+  return data as Tenant;
 };
 
 export const createTenant = async (tenant: NewTenant): Promise<Tenant> => {
@@ -272,7 +272,7 @@ export const createTenant = async (tenant: NewTenant): Promise<Tenant> => {
     throw error;
   }
   
-  return data;
+  return data as Tenant;
 };
 
 export const updateTenant = async (id: string, updates: Partial<Tenant>): Promise<Tenant> => {
@@ -288,7 +288,7 @@ export const updateTenant = async (id: string, updates: Partial<Tenant>): Promis
     throw error;
   }
   
-  return data;
+  return data as Tenant;
 };
 
 export const deleteTenant = async (id: string): Promise<void> => {
