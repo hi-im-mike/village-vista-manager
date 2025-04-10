@@ -57,7 +57,7 @@ export const AddTenantModal = ({ open, onOpenChange, onTenantAdded, unit }: AddT
         unit_id: unit.id,
         user_id: userId.trim(),
         is_primary: isPrimary,
-        monthly_rent: monthlyRent ? parseFloat(monthlyRent) : undefined,
+        monthly_rent: isPrimary && monthlyRent ? parseFloat(monthlyRent) : undefined,
         lease_start: leaseStart ? leaseStart.toISOString() : undefined,
         lease_end: leaseEnd ? leaseEnd.toISOString() : undefined,
         move_in_date: moveInDate ? moveInDate.toISOString() : undefined
@@ -125,23 +125,25 @@ export const AddTenantModal = ({ open, onOpenChange, onTenantAdded, unit }: AddT
             <Label htmlFor="isPrimary">Primary Tenant</Label>
           </div>
           
-          <div className="grid gap-2">
-            <Label htmlFor="monthlyRent">Monthly Rent</Label>
-            <div className="relative">
-              <span className="absolute left-3 top-2.5 text-gray-500">$</span>
-              <Input
-                id="monthlyRent"
-                value={monthlyRent}
-                onChange={(e) => setMonthlyRent(e.target.value)}
-                placeholder="0.00"
-                className="pl-7"
-                type="number"
-                min="0"
-                step="0.01"
-                disabled={isSubmitting}
-              />
+          {isPrimary && (
+            <div className="grid gap-2">
+              <Label htmlFor="monthlyRent">Monthly Rent</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-2.5 text-gray-500">$</span>
+                <Input
+                  id="monthlyRent"
+                  value={monthlyRent}
+                  onChange={(e) => setMonthlyRent(e.target.value)}
+                  placeholder="0.00"
+                  className="pl-7"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  disabled={isSubmitting}
+                />
+              </div>
             </div>
-          </div>
+          )}
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="grid gap-2">
