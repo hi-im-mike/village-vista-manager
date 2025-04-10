@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { User, AuthContextType, UserRole } from '@/types/auth';
 import { useToast } from "@/hooks/use-toast";
@@ -16,7 +15,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        if (event === 'SIGNED_OUT' || event === 'USER_DELETED' || !session) {
+        if (event === 'SIGNED_OUT' || !session) {
           setUser(null);
           localStorage.removeItem('user');
         } else if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {

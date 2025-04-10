@@ -25,7 +25,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
     // Set up listener for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+        if (event === 'SIGNED_OUT' || !session) {
           setRedirectToLogin(true);
         } else if (event === 'SIGNED_IN' && session?.user) {
           // Handle signed in event
