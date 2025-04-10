@@ -7,7 +7,7 @@ const Index = () => {
     document.title = 'Village Vista - Property Management';
   }, []);
 
-  return <Navigate to="/" replace />;
+  return <Navigate to="/dashboard" replace />;
 };
 
 export default Index;
