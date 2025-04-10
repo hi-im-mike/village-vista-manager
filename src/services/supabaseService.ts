@@ -8,6 +8,7 @@ export interface Property {
   name: string;
   address: string;
   units: number;
+  total_units: number | null;
   image_url?: string;
   created_at: string;
   created_by?: string;
@@ -19,6 +20,46 @@ export interface NewProperty {
   units: number;
   image_url?: string;
   created_by?: string;
+}
+
+// Property Unit types
+export interface PropertyUnit {
+  id: string;
+  property_id: string;
+  unit_number: string;
+  status: 'vacant' | 'occupied' | 'maintenance';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NewPropertyUnit {
+  property_id: string;
+  unit_number: string;
+  status?: 'vacant' | 'occupied' | 'maintenance';
+}
+
+// Tenant types
+export interface Tenant {
+  id: string;
+  unit_id: string;
+  user_id: string;
+  is_primary?: boolean;
+  lease_start?: string;
+  lease_end?: string;
+  move_in_date?: string;
+  monthly_rent?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NewTenant {
+  unit_id: string;
+  user_id: string;
+  is_primary?: boolean;
+  lease_start?: string;
+  lease_end?: string;
+  move_in_date?: string;
+  monthly_rent?: number;
 }
 
 // Profile types
@@ -106,6 +147,158 @@ export const deleteProperty = async (id: string): Promise<void> => {
   
   if (error) {
     console.error(`Error deleting property with id ${id}:`, error);
+    throw error;
+  }
+};
+
+// Property Unit functions
+export const getPropertyUnits = async (propertyId?: string): Promise<PropertyUnit[]> => {
+  let query = supabase.from('property_units').select('*');
+  
+  if (propertyId) {
+    query = query.eq('property_id', propertyId);
+  }
+  
+  const { data, error } = await query;
+  
+  if (error) {
+    console.error('Error fetching property units:', error);
+    throw error;
+  }
+  
+  return data || [];
+};
+
+export const getPropertyUnitById = async (id: string): Promise<PropertyUnit | null> => {
+  const { data, error } = await supabase
+    .from('property_units')
+    .select('*')
+    .eq('id', id)
+    .single();
+  
+  if (error) {
+    console.error(`Error fetching property unit with id ${id}:`, error);
+    return null;
+  }
+  
+  return data;
+};
+
+export const createPropertyUnit = async (unit: NewPropertyUnit): Promise<PropertyUnit> => {
+  const { data, error } = await supabase
+    .from('property_units')
+    .insert(unit)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error creating property unit:', error);
+    throw error;
+  }
+  
+  return data;
+};
+
+export const updatePropertyUnit = async (id: string, updates: Partial<PropertyUnit>): Promise<PropertyUnit> => {
+  const { data, error } = await supabase
+    .from('property_units')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error(`Error updating property unit with id ${id}:`, error);
+    throw error;
+  }
+  
+  return data;
+};
+
+export const deletePropertyUnit = async (id: string): Promise<void> => {
+  const { error } = await supabase
+    .from('property_units')
+    .delete()
+    .eq('id', id);
+  
+  if (error) {
+    console.error(`Error deleting property unit with id ${id}:`, error);
+    throw error;
+  }
+};
+
+// Tenant functions
+export const getTenants = async (unitId?: string): Promise<Tenant[]> => {
+  let query = supabase.from('tenants').select('*');
+  
+  if (unitId) {
+    query = query.eq('unit_id', unitId);
+  }
+  
+  const { data, error } = await query;
+  
+  if (error) {
+    console.error('Error fetching tenants:', error);
+    throw error;
+  }
+  
+  return data || [];
+};
+
+export const getTenantById = async (id: string): Promise<Tenant | null> => {
+  const { data, error } = await supabase
+    .from('tenants')
+    .select('*')
+    .eq('id', id)
+    .single();
+  
+  if (error) {
+    console.error(`Error fetching tenant with id ${id}:`, error);
+    return null;
+  }
+  
+  return data;
+};
+
+export const createTenant = async (tenant: NewTenant): Promise<Tenant> => {
+  const { data, error } = await supabase
+    .from('tenants')
+    .insert(tenant)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error creating tenant:', error);
+    throw error;
+  }
+  
+  return data;
+};
+
+export const updateTenant = async (id: string, updates: Partial<Tenant>): Promise<Tenant> => {
+  const { data, error } = await supabase
+    .from('tenants')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error(`Error updating tenant with id ${id}:`, error);
+    throw error;
+  }
+  
+  return data;
+};
+
+export const deleteTenant = async (id: string): Promise<void> => {
+  const { error } = await supabase
+    .from('tenants')
+    .delete()
+    .eq('id', id);
+  
+  if (error) {
+    console.error(`Error deleting tenant with id ${id}:`, error);
     throw error;
   }
 };

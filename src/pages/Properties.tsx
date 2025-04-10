@@ -3,16 +3,18 @@ import React, { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2, Home, Users } from 'lucide-react';
 import { AddPropertyModal } from '@/components/properties/AddPropertyModal';
 import { getProperties, Property } from '@/services/supabaseService';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const Properties = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const fetchProperties = async () => {
     setIsLoading(true);
@@ -37,6 +39,10 @@ const Properties = () => {
 
   const handlePropertyAdded = () => {
     fetchProperties();
+  };
+
+  const handleViewProperty = (propertyId: string) => {
+    navigate(`/properties/${propertyId}`);
   };
 
   return (
@@ -68,7 +74,11 @@ const Properties = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {properties.map((property) => (
-              <Card key={property.id}>
+              <Card 
+                key={property.id} 
+                className="cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => handleViewProperty(property.id)}
+              >
                 <CardHeader className="pb-2">
                   <CardTitle>{property.name}</CardTitle>
                 </CardHeader>
@@ -76,12 +86,22 @@ const Properties = () => {
                   <p className="text-sm text-gray-500">{property.address}</p>
                   <div className="mt-4">
                     <div className="flex justify-between text-sm">
-                      <span>Units:</span>
+                      <span className="flex items-center">
+                        <Home className="h-4 w-4 mr-1 text-gray-500" />
+                        Units:
+                      </span>
                       <span className="font-medium">{property.units}</span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Occupancy:</span>
-                      <span className="font-medium">90%</span>
+                    <div className="flex justify-between text-sm mt-1">
+                      <span className="flex items-center">
+                        <Users className="h-4 w-4 mr-1 text-gray-500" />
+                        Occupancy:
+                      </span>
+                      <span className="font-medium">
+                        {property.total_units ? 
+                          `${property.total_units} units` : 
+                          'No units added'}
+                      </span>
                     </div>
                   </div>
                 </CardContent>

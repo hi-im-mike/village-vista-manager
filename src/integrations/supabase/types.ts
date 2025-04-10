@@ -44,6 +44,7 @@ export type Database = {
           id: string
           image_url: string | null
           name: string
+          total_units: number | null
           units: number
         }
         Insert: {
@@ -53,6 +54,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           name: string
+          total_units?: number | null
           units: number
         }
         Update: {
@@ -62,9 +64,92 @@ export type Database = {
           id?: string
           image_url?: string | null
           name?: string
+          total_units?: number | null
           units?: number
         }
         Relationships: []
+      }
+      property_units: {
+        Row: {
+          created_at: string
+          id: string
+          property_id: string
+          status: string | null
+          unit_number: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          property_id: string
+          status?: string | null
+          unit_number: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          property_id?: string
+          status?: string | null
+          unit_number?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_units_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenants: {
+        Row: {
+          created_at: string
+          id: string
+          is_primary: boolean | null
+          lease_end: string | null
+          lease_start: string | null
+          monthly_rent: number | null
+          move_in_date: string | null
+          unit_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean | null
+          lease_end?: string | null
+          lease_start?: string | null
+          monthly_rent?: number | null
+          move_in_date?: string | null
+          unit_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean | null
+          lease_end?: string | null
+          lease_start?: string | null
+          monthly_rent?: number | null
+          move_in_date?: string | null
+          unit_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenants_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "property_units"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
