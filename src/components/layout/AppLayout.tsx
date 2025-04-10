@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { Sidebar, SidebarContent, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { AppHeader } from '@/components/layout/AppHeader';
@@ -38,15 +39,17 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <AppSidebar />
-        <div className="flex flex-col flex-1 w-full overflow-hidden bg-gray-50">
-          <AppHeader />
-          <main className="flex-1 overflow-auto p-4 md:p-6">
-            {children}
-          </main>
+      <TooltipProvider>
+        <div className="flex min-h-screen w-full">
+          <AppSidebar />
+          <div className="flex flex-col flex-1 w-full overflow-hidden bg-gray-50">
+            <AppHeader />
+            <main className="flex-1 overflow-auto p-4 md:p-6">
+              {children}
+            </main>
+          </div>
         </div>
-      </div>
+      </TooltipProvider>
     </SidebarProvider>
   );
 };

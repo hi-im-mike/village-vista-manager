@@ -155,7 +155,7 @@ const Login = () => {
                     <Button
                       key={account.email}
                       type="button"
-                      variant="outline"
+                      variant="secondary"
                       size="sm"
                       onClick={() => loginAsDemoUser(account.email)}
                       className="text-xs"
@@ -171,6 +171,6 @@ const Login = () => {
       </div>
     </div>
   );
-};
+}
 
 export default Login;

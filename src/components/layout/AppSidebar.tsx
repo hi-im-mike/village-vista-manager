@@ -102,7 +102,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {filteredNavItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild active={location.pathname === item.href}>
+                  <SidebarMenuButton asChild isActive={location.pathname === item.href}>
                     <Link to={item.href} className="flex items-center">
                       <item.icon className="mr-3 h-5 w-5" />
                       <span>{item.label}</span>
