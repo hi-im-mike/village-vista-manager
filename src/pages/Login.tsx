@@ -90,56 +90,52 @@ const Login = () => {
     setFormData({ email, password: 'password' });
     
     try {
-      // Check if user already exists first
-      const { data: { user } } = await supabase.auth.signInWithPassword({
+      // First, try creating the user
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password: 'password',
+        options: {
+          data: {
+            name: displayName,
+            role: role,
+          }
+        }
+      });
+
+      if (signUpError) {
+        // If there's an error and it's about the user existing already, that's okay
+        if (signUpError.message.includes("already registered")) {
+          console.log("User already exists, attempting login");
+        } else {
+          throw signUpError;
+        }
+      } else {
+        toast({
+          title: "Demo account created",
+          description: `Created account for ${displayName}`,
+        });
+      }
+
+      // Now try to login regardless
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password: 'password',
       });
       
-      if (user) {
-        // User exists, just login
-        toast({
-          title: "Login successful",
-          description: `Welcome back, ${displayName}!`,
-        });
-        return;
-      }
+      if (signInError) throw signInError;
+      
+      toast({
+        title: "Login successful",
+        description: `Welcome back, ${displayName}!`,
+      });
+
     } catch (error) {
-      // User doesn't exist, proceed with creation
-      try {
-        // Create the user
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password: 'password',
-          options: {
-            data: {
-              name: displayName,
-              role: role,
-            }
-          }
-        });
-
-        if (error) throw error;
-
-        // Auto-login after creation
-        await supabase.auth.signInWithPassword({
-          email,
-          password: 'password',
-        });
-
-        toast({
-          title: "Demo account created",
-          description: `Logged in as ${displayName}`,
-        });
-
-      } catch (signupError) {
-        console.error('Error creating demo user:', signupError);
-        toast({
-          title: "Error creating demo account",
-          description: (signupError as Error).message,
-          variant: "destructive",
-        });
-      }
+      console.error('Error with demo user:', error);
+      toast({
+        title: "Login failed",
+        description: (error as Error).message,
+        variant: "destructive",
+      });
     } finally {
       setIsCreatingDemo(false);
     }
