@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { z } from 'zod';
@@ -90,49 +89,49 @@ const Login = () => {
     setFormData({ email, password: 'password' });
     
     try {
-      // First, check if the user already exists
-      const { data: userData, error: fetchError } = await supabase.auth.admin.getUserByEmail(email);
-      
-      if (fetchError || !userData) {
-        // User doesn't exist, create a new one
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password: 'password',
-          options: {
-            data: {
-              name: displayName,
-              role: role,
-            },
-            emailRedirectTo: window.location.origin,
-          }
-        });
-
-        if (signUpError) {
-          if (!signUpError.message.includes("already registered")) {
-            throw signUpError;
-          }
-        } else {
-          toast({
-            title: "Demo account created",
-            description: `Created account for ${displayName}`,
-          });
+      // First try to sign up the user, which works if they don't exist yet
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password: 'password',
+        options: {
+          data: {
+            name: displayName,
+            role: role,
+          },
+          emailRedirectTo: window.location.origin,
         }
+      });
+
+      if (signUpError) {
+        // If it's not an "already registered" error, there's a real problem
+        if (!signUpError.message.includes("already registered")) {
+          throw signUpError;
+        }
+        // Otherwise, the user exists which is fine
+        console.log("User already exists, attempting login");
+      } else {
+        toast({
+          title: "Demo account created",
+          description: `Created account for ${displayName}`,
+        });
       }
 
-      // Directly sign in with the admin API to bypass email verification
-      const { data: adminAuthData, error: adminAuthError } = await supabase.auth.admin.signInWithEmail({
+      // Now try to sign in with password
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
-        password: 'password'
+        password: 'password',
       });
       
-      if (adminAuthError) {
-        // If admin sign-in fails, fall back to regular sign-in
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password: 'password',
-        });
-        
-        if (signInError) throw signInError;
+      if (signInError) {
+        // If there's an email confirmation error, let the user know
+        if (signInError.message.includes("Email not confirmed")) {
+          toast({
+            title: "Email confirmation required",
+            description: "Please check your Supabase settings to disable email confirmation for testing purposes.",
+            variant: "destructive",
+          });
+        }
+        throw signInError;
       }
       
       toast({
