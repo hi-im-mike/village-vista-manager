@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { supabase } from '@/integrations/supabase/client';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address' }),
@@ -23,6 +24,7 @@ const Login = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCreatingDemo, setIsCreatingDemo] = useState(false);
 
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -83,15 +85,75 @@ const Login = () => {
     }
   };
 
+  const createAndLoginDemoUser = async (email: string, role: string, displayName: string) => {
+    setIsCreatingDemo(true);
+    setFormData({ email, password: 'password' });
+    
+    try {
+      // Check if user already exists first
+      const { data: { user } } = await supabase.auth.signInWithPassword({
+        email,
+        password: 'password',
+      });
+      
+      if (user) {
+        // User exists, just login
+        toast({
+          title: "Login successful",
+          description: `Welcome back, ${displayName}!`,
+        });
+        return;
+      }
+    } catch (error) {
+      // User doesn't exist, proceed with creation
+      try {
+        // Create the user
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password: 'password',
+          options: {
+            data: {
+              name: displayName,
+              role: role,
+            }
+          }
+        });
+
+        if (error) throw error;
+
+        // Auto-login after creation
+        await supabase.auth.signInWithPassword({
+          email,
+          password: 'password',
+        });
+
+        toast({
+          title: "Demo account created",
+          description: `Logged in as ${displayName}`,
+        });
+
+      } catch (signupError) {
+        console.error('Error creating demo user:', signupError);
+        toast({
+          title: "Error creating demo account",
+          description: (signupError as Error).message,
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsCreatingDemo(false);
+    }
+  };
+
   const demoAccounts = [
-    { email: 'investor@example.com', role: 'Investor' },
-    { email: 'manager@example.com', role: 'Property Manager' },
-    { email: 'tenant@example.com', role: 'Tenant' },
-    { email: 'maintenance@example.com', role: 'Maintenance Staff' },
+    { email: 'investor@example.com', role: 'investor', displayName: 'Investor' },
+    { email: 'manager@example.com', role: 'property_manager', displayName: 'Property Manager' },
+    { email: 'tenant@example.com', role: 'tenant', displayName: 'Tenant' },
+    { email: 'maintenance@example.com', role: 'maintenance', displayName: 'Maintenance Staff' },
   ];
 
-  const loginAsDemoUser = (email: string) => {
-    setFormData({ email, password: 'password' });
+  const loginAsDemoUser = (email: string, role: string, displayName: string) => {
+    createAndLoginDemoUser(email, role, displayName);
   };
 
   return (
@@ -146,12 +208,12 @@ const Login = () => {
               <Alert variant="default" className="bg-gray-50 border-gray-200">
                 <AlertTitle>Demo Information</AlertTitle>
                 <AlertDescription>
-                  Use <strong>password</strong> as the password for all demo accounts.
+                  Click on a demo account button below to automatically create and log in with that role.
                 </AlertDescription>
               </Alert>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button type="submit" className="w-full" disabled={isSubmitting || isCreatingDemo}>
                 {isSubmitting ? 'Logging in...' : 'Login'}
               </Button>
               
@@ -164,10 +226,11 @@ const Login = () => {
                       type="button"
                       variant="secondary"
                       size="sm"
-                      onClick={() => loginAsDemoUser(account.email)}
+                      onClick={() => loginAsDemoUser(account.email, account.role, account.displayName)}
+                      disabled={isCreatingDemo}
                       className="text-xs"
                     >
-                      {account.role}
+                      {account.displayName}
                     </Button>
                   ))}
                 </div>
