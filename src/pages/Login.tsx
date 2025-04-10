@@ -141,11 +141,12 @@ const Login = () => {
     }
   };
 
+  // Update demo accounts with valid email domains
   const demoAccounts = [
-    { email: 'investor@example.com', role: 'investor', displayName: 'Investor' },
-    { email: 'manager@example.com', role: 'property_manager', displayName: 'Property Manager' },
-    { email: 'tenant@example.com', role: 'tenant', displayName: 'Tenant' },
-    { email: 'maintenance@example.com', role: 'maintenance', displayName: 'Maintenance Staff' },
+    { email: 'investor@gmail.com', role: 'investor', displayName: 'Investor' },
+    { email: 'manager@gmail.com', role: 'property_manager', displayName: 'Property Manager' },
+    { email: 'tenant@gmail.com', role: 'tenant', displayName: 'Tenant' },
+    { email: 'maintenance@gmail.com', role: 'maintenance', displayName: 'Maintenance Staff' },
   ];
 
   const loginAsDemoUser = (email: string, role: string, displayName: string) => {
