@@ -58,7 +58,17 @@ const UnitDetails = () => {
       
       setUnit(unitData);
       setProperty(propertyData);
-      setTenants(tenantsData);
+      // Sort tenants by isPrimary first, then by user_id
+      setTenants(
+        tenantsData.sort((a, b) => {
+          // Sort primary tenants first
+          if (a.is_primary && !b.is_primary) return -1;
+          if (!a.is_primary && b.is_primary) return 1;
+          
+          // Then sort by user_id
+          return a.user_id.localeCompare(b.user_id);
+        })
+      );
     } catch (error) {
       console.error('Error fetching unit details:', error);
       toast({
@@ -220,10 +230,11 @@ const UnitDetails = () => {
                     <TableCaption>List of all tenants in Unit {unit?.unit_number}</TableCaption>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Name</TableHead>
+                        <TableHead>Tenant</TableHead>
                         <TableHead>Primary</TableHead>
                         <TableHead>Lease Dates</TableHead>
                         <TableHead>Move In</TableHead>
+                        {/* Only show rent column conditionally */}
                         <TableHead>Monthly Rent</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
@@ -238,13 +249,18 @@ const UnitDetails = () => {
                           </TableCell>
                           <TableCell>{formatDate(tenant.move_in_date)}</TableCell>
                           <TableCell>
-                            ${tenant.monthly_rent?.toFixed(2) || 'Not set'}
+                            {tenant.is_primary && tenant.monthly_rent 
+                              ? `$${tenant.monthly_rent.toFixed(2)}`
+                              : tenant.is_primary 
+                                ? 'Not set'
+                                : '-'}
                           </TableCell>
                           <TableCell className="text-right space-x-2">
                             <Button 
                               variant="outline" 
                               size="sm"
                               onClick={() => openRentCalculator(tenant)}
+                              disabled={!tenant.is_primary}
                             >
                               <Calculator className="h-4 w-4 mr-1" />
                               Rent

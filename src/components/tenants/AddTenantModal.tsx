@@ -106,12 +106,12 @@ export const AddTenantModal = ({ open, onOpenChange, onTenantAdded, unit }: AddT
         
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="userId">User ID</Label>
+            <Label htmlFor="userId">Tenant</Label>
             <Input
               id="userId"
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
-              placeholder="Enter the user's ID"
+              placeholder="Enter the tenant's ID"
               disabled={isSubmitting}
             />
           </div>
