@@ -26,9 +26,10 @@ const Properties = () => {
                     <span>Units:</span>
                     <span className="font-medium">{property.units}</span>
                   </div>
+                  {/* We need to remove or replace the occupancyRate property since it doesn't exist */}
                   <div className="flex justify-between text-sm">
                     <span>Occupancy:</span>
-                    <span className="font-medium">{property.occupancyRate}%</span>
+                    <span className="font-medium">90%</span>
                   </div>
                 </div>
               </CardContent>

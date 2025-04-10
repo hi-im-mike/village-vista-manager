@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -32,7 +31,6 @@ const Login = () => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
-    // Clear validation error when user types
     if (errors[name]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -45,7 +43,6 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate form data
     try {
       loginSchema.parse(formData);
       setErrors({});
@@ -69,7 +66,6 @@ const Login = () => {
       navigate('/');
     } catch (error) {
       console.error('Login error:', error);
-      // Error is handled in the auth context
     } finally {
       setIsSubmitting(false);
     }
@@ -84,7 +80,6 @@ const Login = () => {
 
   const loginAsDemoUser = (email: string) => {
     setFormData({ email, password: 'password' });
-    // You could also auto-submit the form here if desired
   };
 
   return (
@@ -136,7 +131,7 @@ const Login = () => {
                 )}
               </div>
 
-              <Alert variant="outline" className="bg-gray-50 border-gray-200">
+              <Alert variant="default" className="bg-gray-50 border-gray-200">
                 <AlertTitle>Demo Information</AlertTitle>
                 <AlertDescription>
                   Use <strong>password</strong> as the password for all demo accounts.
