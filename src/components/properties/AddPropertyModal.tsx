@@ -6,15 +6,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { createProperty, createUser } from '@/services/supabaseService';
+import { useAuth } from '@/contexts/AuthContext';
+import { Loader2 } from 'lucide-react';
 
 interface AddPropertyModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onPropertyAdded?: () => void;
 }
 
-export const AddPropertyModal = ({ open, onOpenChange }: AddPropertyModalProps) => {
+export const AddPropertyModal = ({ open, onOpenChange, onPropertyAdded }: AddPropertyModalProps) => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('property');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Property form state
   const [propertyName, setPropertyName] = useState('');
@@ -26,32 +32,78 @@ export const AddPropertyModal = ({ open, onOpenChange }: AddPropertyModalProps) 
   const [investorEmail, setInvestorEmail] = useState('');
   const [investorPassword, setInvestorPassword] = useState('');
 
-  const handleAddProperty = () => {
-    // In a real app, this would send data to your backend
-    console.log('Adding property:', { propertyName, propertyAddress, propertyUnits });
+  const handleAddProperty = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "You must be logged in to add a property.",
+        variant: "destructive"
+      });
+      return;
+    }
     
-    toast({
-      title: "Property Added",
-      description: `${propertyName} has been successfully added.`,
-    });
-    
-    // Reset form and close modal
-    resetPropertyForm();
-    onOpenChange(false);
+    setIsSubmitting(true);
+    try {
+      await createProperty({
+        name: propertyName,
+        address: propertyAddress,
+        units: parseInt(propertyUnits),
+        created_by: user.id
+      });
+      
+      toast({
+        title: "Property Added",
+        description: `${propertyName} has been successfully added.`,
+      });
+      
+      // Reset form and close modal
+      resetPropertyForm();
+      onOpenChange(false);
+      
+      // Refresh the property list
+      if (onPropertyAdded) {
+        onPropertyAdded();
+      }
+    } catch (error) {
+      console.error('Error adding property:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add property. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleAddInvestor = () => {
-    // In a real app, this would create a new user with investor role
-    console.log('Adding investor:', { investorName, investorEmail, investorPassword });
-    
-    toast({
-      title: "Investor Added",
-      description: `${investorName} has been successfully added as an investor.`,
-    });
-    
-    // Reset form and close modal
-    resetInvestorForm();
-    onOpenChange(false);
+  const handleAddInvestor = async () => {
+    setIsSubmitting(true);
+    try {
+      await createUser({
+        name: investorName,
+        email: investorEmail,
+        password: investorPassword,
+        role: 'investor'
+      });
+      
+      toast({
+        title: "Investor Added",
+        description: `${investorName} has been successfully added as an investor.`,
+      });
+      
+      // Reset form and close modal
+      resetInvestorForm();
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error adding investor:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add investor. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const resetPropertyForm = () => {
@@ -88,6 +140,7 @@ export const AddPropertyModal = ({ open, onOpenChange }: AddPropertyModalProps) 
                   value={propertyName}
                   onChange={(e) => setPropertyName(e.target.value)}
                   placeholder="Enter property name"
+                  disabled={isSubmitting}
                 />
               </div>
               
@@ -98,6 +151,7 @@ export const AddPropertyModal = ({ open, onOpenChange }: AddPropertyModalProps) 
                   value={propertyAddress}
                   onChange={(e) => setPropertyAddress(e.target.value)}
                   placeholder="Enter property address"
+                  disabled={isSubmitting}
                 />
               </div>
               
@@ -109,13 +163,24 @@ export const AddPropertyModal = ({ open, onOpenChange }: AddPropertyModalProps) 
                   value={propertyUnits}
                   onChange={(e) => setPropertyUnits(e.target.value)}
                   placeholder="Enter number of units"
+                  disabled={isSubmitting}
                 />
               </div>
             </div>
             
             <DialogFooter>
-              <Button onClick={handleAddProperty} disabled={!propertyName || !propertyAddress || !propertyUnits}>
-                Add Property
+              <Button 
+                onClick={handleAddProperty} 
+                disabled={isSubmitting || !propertyName || !propertyAddress || !propertyUnits}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Adding...
+                  </>
+                ) : (
+                  'Add Property'
+                )}
               </Button>
             </DialogFooter>
           </TabsContent>
@@ -129,6 +194,7 @@ export const AddPropertyModal = ({ open, onOpenChange }: AddPropertyModalProps) 
                   value={investorName}
                   onChange={(e) => setInvestorName(e.target.value)}
                   placeholder="Enter investor name"
+                  disabled={isSubmitting}
                 />
               </div>
               
@@ -140,6 +206,7 @@ export const AddPropertyModal = ({ open, onOpenChange }: AddPropertyModalProps) 
                   value={investorEmail}
                   onChange={(e) => setInvestorEmail(e.target.value)}
                   placeholder="Enter investor email"
+                  disabled={isSubmitting}
                 />
               </div>
               
@@ -151,13 +218,24 @@ export const AddPropertyModal = ({ open, onOpenChange }: AddPropertyModalProps) 
                   value={investorPassword}
                   onChange={(e) => setInvestorPassword(e.target.value)}
                   placeholder="Enter password"
+                  disabled={isSubmitting}
                 />
               </div>
             </div>
             
             <DialogFooter>
-              <Button onClick={handleAddInvestor} disabled={!investorName || !investorEmail || !investorPassword}>
-                Add Investor
+              <Button 
+                onClick={handleAddInvestor} 
+                disabled={isSubmitting || !investorName || !investorEmail || !investorPassword}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Adding...
+                  </>
+                ) : (
+                  'Add Investor'
+                )}
               </Button>
             </DialogFooter>
           </TabsContent>
