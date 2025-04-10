@@ -15,4 +15,5 @@ export interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }

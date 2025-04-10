@@ -1,10 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sidebar, SidebarContent, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { Navigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -15,8 +17,42 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   children,
   requiredRoles = [] 
 }) => {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading, setUser } = useAuth();
+  const { toast } = useToast();
+  const [redirectToLogin, setRedirectToLogin] = useState(false);
   
+  useEffect(() => {
+    // Set up listener for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+          setRedirectToLogin(true);
+        } else if (event === 'SIGNED_IN' && session?.user) {
+          // Handle signed in event
+        } else if (event === 'TOKEN_REFRESHED') {
+          // Handle token refreshed
+        } else if (!session) {
+          setRedirectToLogin(true);
+        }
+      }
+    );
+
+    // Check current session on mount
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setRedirectToLogin(true);
+      }
+    };
+
+    checkSession();
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   // If still loading, show a loading spinner
   if (isLoading) {
     return (
@@ -26,8 +62,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
     );
   }
 
-  // If not authenticated, redirect to login
-  if (!isAuthenticated) {
+  // If redirect flag is set or not authenticated, redirect to login
+  if (redirectToLogin || !isAuthenticated) {
     return <Navigate to="/login" />;
   }
 

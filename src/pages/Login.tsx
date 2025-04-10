@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
 import { Building2 } from 'lucide-react';
@@ -23,9 +24,18 @@ const Login = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      const from = location.state?.from?.pathname || '/';
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, location]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -63,9 +73,11 @@ const Login = () => {
     
     try {
       await login(formData.email, formData.password);
-      navigate('/');
+      const from = location.state?.from?.pathname || '/';
+      navigate(from, { replace: true });
     } catch (error) {
       console.error('Login error:', error);
+      // Error is already handled in the login function
     } finally {
       setIsSubmitting(false);
     }
@@ -166,6 +178,6 @@ const Login = () => {
       </div>
     </div>
   );
-}
+};
 
 export default Login;
