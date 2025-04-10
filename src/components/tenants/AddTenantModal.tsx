@@ -58,9 +58,9 @@ export const AddTenantModal = ({ open, onOpenChange, onTenantAdded, unit }: AddT
         user_id: userId.trim(),
         is_primary: isPrimary,
         monthly_rent: isPrimary && monthlyRent ? parseFloat(monthlyRent) : undefined,
-        lease_start: leaseStart ? leaseStart.toISOString() : undefined,
-        lease_end: leaseEnd ? leaseEnd.toISOString() : undefined,
-        move_in_date: moveInDate ? moveInDate.toISOString() : undefined
+        lease_start: isPrimary && leaseStart ? leaseStart.toISOString() : undefined,
+        lease_end: isPrimary && leaseEnd ? leaseEnd.toISOString() : undefined,
+        move_in_date: isPrimary && moveInDate ? moveInDate.toISOString() : undefined
       });
       
       toast({
@@ -126,107 +126,109 @@ export const AddTenantModal = ({ open, onOpenChange, onTenantAdded, unit }: AddT
           </div>
           
           {isPrimary && (
-            <div className="grid gap-2">
-              <Label htmlFor="monthlyRent">Monthly Rent</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-2.5 text-gray-500">$</span>
-                <Input
-                  id="monthlyRent"
-                  value={monthlyRent}
-                  onChange={(e) => setMonthlyRent(e.target.value)}
-                  placeholder="0.00"
-                  className="pl-7"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  disabled={isSubmitting}
-                />
+            <>
+              <div className="grid gap-2">
+                <Label htmlFor="monthlyRent">Monthly Rent</Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2.5 text-gray-500">$</span>
+                  <Input
+                    id="monthlyRent"
+                    value={monthlyRent}
+                    onChange={(e) => setMonthlyRent(e.target.value)}
+                    placeholder="0.00"
+                    className="pl-7"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    disabled={isSubmitting}
+                  />
+                </div>
               </div>
-            </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label>Lease Start Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !leaseStart && "text-muted-foreground"
+                        )}
+                      >
+                        <Calendar className="mr-2 h-4 w-4" />
+                        {leaseStart ? format(leaseStart, "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <CalendarComponent
+                        mode="single"
+                        selected={leaseStart}
+                        onSelect={setLeaseStart}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                
+                <div className="grid gap-2">
+                  <Label>Lease End Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !leaseEnd && "text-muted-foreground"
+                        )}
+                      >
+                        <Calendar className="mr-2 h-4 w-4" />
+                        {leaseEnd ? format(leaseEnd, "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <CalendarComponent
+                        mode="single"
+                        selected={leaseEnd}
+                        onSelect={setLeaseEnd}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+              
+              <div className="grid gap-2">
+                <Label>Move In Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !moveInDate && "text-muted-foreground"
+                      )}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {moveInDate ? format(moveInDate, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={moveInDate}
+                      onSelect={setMoveInDate}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </>
           )}
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label>Lease Start Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !leaseStart && "text-muted-foreground"
-                    )}
-                  >
-                    <Calendar className="mr-2 h-4 w-4" />
-                    {leaseStart ? format(leaseStart, "PPP") : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    mode="single"
-                    selected={leaseStart}
-                    onSelect={setLeaseStart}
-                    initialFocus
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            
-            <div className="grid gap-2">
-              <Label>Lease End Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !leaseEnd && "text-muted-foreground"
-                    )}
-                  >
-                    <Calendar className="mr-2 h-4 w-4" />
-                    {leaseEnd ? format(leaseEnd, "PPP") : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    mode="single"
-                    selected={leaseEnd}
-                    onSelect={setLeaseEnd}
-                    initialFocus
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
-          
-          <div className="grid gap-2">
-            <Label>Move In Date</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !moveInDate && "text-muted-foreground"
-                  )}
-                >
-                  <Calendar className="mr-2 h-4 w-4" />
-                  {moveInDate ? format(moveInDate, "PPP") : <span>Pick a date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <CalendarComponent
-                  mode="single"
-                  selected={moveInDate}
-                  onSelect={setMoveInDate}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
         </div>
         
         <DialogFooter>
