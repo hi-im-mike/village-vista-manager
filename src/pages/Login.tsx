@@ -90,39 +90,50 @@ const Login = () => {
     setFormData({ email, password: 'password' });
     
     try {
-      // First, try creating the user
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password: 'password',
-        options: {
-          data: {
-            name: displayName,
-            role: role,
+      // First, check if the user already exists
+      const { data: userData, error: fetchError } = await supabase.auth.admin.getUserByEmail(email);
+      
+      if (fetchError || !userData) {
+        // User doesn't exist, create a new one
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password: 'password',
+          options: {
+            data: {
+              name: displayName,
+              role: role,
+            },
+            emailRedirectTo: window.location.origin,
           }
-        }
-      });
-
-      if (signUpError) {
-        // If there's an error and it's about the user existing already, that's okay
-        if (signUpError.message.includes("already registered")) {
-          console.log("User already exists, attempting login");
-        } else {
-          throw signUpError;
-        }
-      } else {
-        toast({
-          title: "Demo account created",
-          description: `Created account for ${displayName}`,
         });
+
+        if (signUpError) {
+          if (!signUpError.message.includes("already registered")) {
+            throw signUpError;
+          }
+        } else {
+          toast({
+            title: "Demo account created",
+            description: `Created account for ${displayName}`,
+          });
+        }
       }
 
-      // Now try to login regardless
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      // Directly sign in with the admin API to bypass email verification
+      const { data: adminAuthData, error: adminAuthError } = await supabase.auth.admin.signInWithEmail({
         email,
-        password: 'password',
+        password: 'password'
       });
       
-      if (signInError) throw signInError;
+      if (adminAuthError) {
+        // If admin sign-in fails, fall back to regular sign-in
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password: 'password',
+        });
+        
+        if (signInError) throw signInError;
+      }
       
       toast({
         title: "Login successful",
